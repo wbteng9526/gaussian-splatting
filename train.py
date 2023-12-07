@@ -89,6 +89,8 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
         # Loss
         gt_image = viewpoint_cam.original_image.cuda()
         Ll1 = l1_loss(image, gt_image)
+        Laniso = (torch.max(torch.max(gaussians._scaling, dim=1).values / torch.min(gaussians._scaling, dim=1).values, radii)-radii).mean()
+        loss = (1.0 - opt.lambda_dssim - opt.lambda_daniso) * Ll1 + opt.lambda_dssim * (1.0 - ssim(image, gt_image)) + opt.lambda_daniso * Laniso
         loss = (1.0 - opt.lambda_dssim) * Ll1 + opt.lambda_dssim * (1.0 - ssim(image, gt_image))
         loss.backward()
 
